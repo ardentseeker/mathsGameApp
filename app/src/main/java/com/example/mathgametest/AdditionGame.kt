@@ -8,6 +8,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import java.util.*
 import kotlin.random.Random
 
 class AdditionGame : AppCompatActivity() {
@@ -20,11 +21,13 @@ class AdditionGame : AppCompatActivity() {
     lateinit var next:Button
     lateinit var input:EditText
 
+    lateinit var timer: CountDownTimer
+
     private var scoreV = 0
     private var lifeV = 3
     private var correctAns = 0
-    val totalTime = 60
-
+    private val totalTime:Long = 60000
+    private var timeLeft:Long = totalTime
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,26 +82,47 @@ class AdditionGame : AppCompatActivity() {
 
     }
 
-   private fun addGameContinue(){
-
-       object : CountDownTimer(60000, 1000) {
-
-           override fun onTick(millisUntilFinished: Long) {
-               time.text = (millisUntilFinished / 1000).toString()
-           }
-
-           override fun onFinish() {
-               time.text = totalTime.toString()
-               Toast.makeText(applicationContext,"your time is up ",Toast.LENGTH_LONG).show()
-               addGameContinue()
-           }
-       }.start()
-        val x = Random.nextInt(199,1000)
-        val y = Random.nextInt(199,1000)
-        ques.text = "$x + $y "
-        correctAns = x + y
-
+   private fun addGameContinue()
+   {
+       val x = Random.nextInt(199,1000)
+       val y = Random.nextInt(199,1000)
+       ques.text = "$x + $y "
+       correctAns = x + y
+       startTimer()
     }
 
+    fun startTimer(){
+        timer = object :CountDownTimer(totalTime,1000){
 
+            override fun onTick(totalTime: Long) {
+                updateTimer()
+            }
+
+            override fun onFinish() {
+                updateTimer()
+                resetTimer()
+                stopTimer()
+
+                lifeV--
+                life.text = lifeV.toString()
+                ques.text = "your time is up"
+            }
+
+        }.start()
+    }
+
+    fun stopTimer()
+    {
+        timer.cancel()
+    }
+    private fun resetTimer()
+    {
+        timeLeft = totalTime
+        updateTimer()
+    }
+
+    private fun updateTimer() {
+        val remainingTime:Int = (totalTime/1000) .toInt()
+        time.text = String.format(Locale.getDefault(),"%02d",remainingTime)
+    }
 }
